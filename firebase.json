@@ -1,0 +1,30 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "we-chat-43cb7",
+          "appId": "1:549416372931:android:29e48db75d1c1c3b773076",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "we-chat-43cb7",
+          "configurations": {
+            "android": "1:549416372931:android:29e48db75d1c1c3b773076",
+            "ios": "1:549416372931:ios:782382a6c0b88397773076"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
