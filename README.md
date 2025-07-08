@@ -51,3 +51,28 @@ flutterfire configure
 
 # 4. Run the app
 flutter run
+
+## 📱 Screenshots
+
+### 🔐 Login Page
+![Login Page](images/screenshots/login_page.jpg)
+
+---
+
+### 🎉 Intro Screen
+![Intro](images/screenshots/intro_image.jpg)
+
+---
+
+### 🏠 Home Screen
+![Home Screen](images/screenshots/home_screen.jpg)
+
+---
+
+### 🧑‍💼 Profile Screen (with Image)
+![Profile Screen](images/screenshots/profile_image.jpg)
+
+---
+
+### 📷 Pick Profile Picture (Image Picker View)
+![Image Picker](images/screenshots/image_upload_view.jpg)
