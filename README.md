@@ -54,25 +54,10 @@ flutter run
 
 ## 📱 Screenshots
 
-### 🔐 Login Page
-![Login Page](images/screenshots/login_page.jpg)
+| Login | Home | Profile |
+|-------|------|---------|
+| <img src="images/screenshots/login_page.jpg" width="200"/> | <img src="images/screenshots/home_screen.jpg" width="200"/> | <img src="images/screenshots/profile_image.jpg" width="200"/> |
 
----
-
-### 🎉 Intro Screen
-![Intro](images/screenshots/intro_image.jpg)
-
----
-
-### 🏠 Home Screen
-![Home Screen](images/screenshots/home_screen.jpg)
-
----
-
-### 🧑‍💼 Profile Screen (with Image)
-![Profile Screen](images/screenshots/profile_image.jpg)
-
----
-
-### 📷 Pick Profile Picture (Image Picker View)
-![Image Picker](images/screenshots/image_upload_view.jpg)
+| Intro | Image Picker |
+|-------|--------------|
+| <img src="images/screenshots/intro_image.jpg" width="200"/> | <img src="images/screenshots/image_upload_view.jpg" width="200"/> |
