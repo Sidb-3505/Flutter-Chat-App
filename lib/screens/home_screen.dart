@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart%20';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:we_chat/helper/dialogs.dart';
 import 'package:we_chat/main.dart';
 import 'package:we_chat/models/chat_user.dart';
 import 'package:we_chat/network/apis.dart';
@@ -145,17 +146,18 @@ class _HomeScreenState extends State<HomeScreen> {
           floatingActionButton: Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: FloatingActionButton(
-              onPressed: () async {
-                await APIs.auth.signOut();
-                await GoogleSignIn().signOut();
+              onPressed: () {
+                _addChatUserDialog(context);
               },
-              child: const Icon(Icons.add_comment_rounded),
+              child: const Icon(Icons.person_add),
             ),
           ),
 
           ///Showing Chats
           body: StreamBuilder(
-            stream: APIs.getAllUsers(),
+            stream: APIs.getMyUsersId(),
+
+            /// get id of only known users
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 ///if data is loading
@@ -166,47 +168,168 @@ class _HomeScreenState extends State<HomeScreen> {
                 /// if all or some data is loaded then show
                 case ConnectionState.active:
                 case ConnectionState.done:
-                  final data = snapshot.data?.docs;
+                  final docList = snapshot.data?.docs;
 
-                  /// Clear list before adding new data to avoid duplicates
-                  _list.clear();
-
-                  /// Convert each document to ChatUser and add to list
-                  _list.addAll(
-                    data!.map((e) => ChatUser.fromJson(e.data())).toList(),
-                    //e is each document
-                    //map() applies this conversion to every document in the list.
-                    //chatuser.fromjson : converts JSON to a Dart object.
-                    // It returns an Iterable<ChatUser>.
-                    //list.addAll(...): Adds all the converted ChatUser objects into your local list
-                  );
-
-                  if (_list.isNotEmpty) {
-                    return ListView.builder(
-                      padding: EdgeInsets.only(top: mq.height * .01),
-                      physics: BouncingScrollPhysics(),
-                      itemCount:
-                          _isSearching ? _searchList.length : _list.length,
-                      itemBuilder: (context, index) {
-                        return ChatUserCard(
-                          user:
-                              _isSearching ? _searchList[index] : _list[index],
-                        );
-                      },
-                    );
-                  } else {
-                    return Center(
-                      child: const Text(
+                  if (docList == null || docList.isEmpty) {
+                    return const Center(
+                      child: Text(
                         'No Connections Found',
                         style: TextStyle(fontSize: 20),
                       ),
                     );
                   }
+                  return StreamBuilder(
+                    stream: APIs.getAllUsers(
+                      snapshot.data?.docs.map((e) => e.id).toList() ?? [],
+                    ),
+
+                    /// get only those users. whose ids are provided
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        ///if data is loading
+                        case ConnectionState.waiting:
+                        case ConnectionState.none:
+                        // return Center(
+                        //   child: const CircularProgressIndicator(),
+                        // );
+
+                        /// if all or some data is loaded then show
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          final data = snapshot.data?.docs;
+
+                          /// Clear list before adding new data to avoid duplicates
+                          _list.clear();
+
+                          /// Convert each document to ChatUser and add to list
+                          _list.addAll(
+                            data!
+                                .map((e) => ChatUser.fromJson(e.data()))
+                                .toList(),
+                            //e is each document
+                            //map() applies this conversion to every document in the list.
+                            //chatuser.fromjson : converts JSON to a Dart object.
+                            // It returns an Iterable<ChatUser>.
+                            //list.addAll(...): Adds all the converted ChatUser objects into your local list
+                          );
+
+                          if (_list.isNotEmpty) {
+                            return ListView.builder(
+                              padding: EdgeInsets.only(top: mq.height * .01),
+                              physics: BouncingScrollPhysics(),
+                              itemCount:
+                                  _isSearching
+                                      ? _searchList.length
+                                      : _list.length,
+                              itemBuilder: (context, index) {
+                                return ChatUserCard(
+                                  user:
+                                      _isSearching
+                                          ? _searchList[index]
+                                          : _list[index],
+                                );
+                              },
+                            );
+                          } else {
+                            return Center(
+                              child: const Text(
+                                'No Connections Found',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            );
+                          }
+                      }
+                    },
+                  );
               }
+              return Center(child: CircularProgressIndicator(strokeWidth: 2));
             },
           ),
         ),
       ),
+    );
+  }
+
+  void _addChatUserDialog(BuildContext parentContext) {
+    String email = '';
+
+    showDialog(
+      context: parentContext,
+      builder:
+          (dialogContext) => AlertDialog(
+            contentPadding: const EdgeInsets.only(
+              left: 24,
+              right: 24,
+              top: 20,
+              bottom: 10,
+            ),
+
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+
+            /// title
+            title: const Row(
+              children: [
+                Icon(Icons.person_add, color: Colors.blue, size: 28),
+                Text('  Add User'),
+              ],
+            ),
+
+            /// content
+            content: TextFormField(
+              maxLines: null,
+              onChanged: (value) => email = value,
+              decoration: const InputDecoration(
+                hintText: 'Email Id',
+                prefixIcon: const Icon(Icons.email, color: Colors.blue),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                ),
+              ),
+            ),
+
+            /// actions
+            actions: [
+              /// cancel button
+              MaterialButton(
+                onPressed: () {
+                  /// hide alert dialog
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.red, fontSize: 16),
+                ),
+              ),
+
+              /// add button
+              MaterialButton(
+                onPressed: () async {
+                  /// Close the dialog only after all updates
+                  Navigator.of(dialogContext).pop();
+                  if (email.isNotEmpty) {
+                    APIs.addChatuser(email).then((value) {
+                      if (!value) {
+                        Dialogs.showSnackBar(context, 'User does not exists!!');
+                      } else {
+                        Dialogs.showSnackBar(
+                          context,
+                          'Email added successfully',
+                        );
+                      }
+                    });
+                  } else {
+                    Dialogs.showSnackBar(context, 'Email cannot be empty');
+                  }
+                },
+                child: const Text(
+                  'Add',
+                  style: TextStyle(color: Colors.blue, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
     );
   }
 }

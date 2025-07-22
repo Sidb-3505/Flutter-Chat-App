@@ -10,8 +10,31 @@ class MyDateUtil {
     return TimeOfDay.fromDateTime(date).format(context);
   }
 
+  /// for getting formatted time for sent and read
+  static String getMessageTime({required String time}) {
+    final DateTime sent = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
+    final DateTime now = DateTime.now();
+
+    // Format hour and minute manually
+    final String hour = sent.hour.toString().padLeft(2, '0');
+    final String minute = sent.minute.toString().padLeft(2, '0');
+    final String formattedTime = '$hour:$minute';
+
+    /// if the msg is sent on today's date
+    if (now.day == sent.day &&
+        now.month == sent.month &&
+        now.year == sent.year) {
+      return formattedTime;
+    }
+
+    /// if its of some other day
+    return now.year == sent.year
+        ? '$formattedTime, ${sent.day} ${_getMonth(sent)}'
+        : '$formattedTime, ${sent.day} ${_getMonth(sent)} ${sent.year}';
+  }
+
   /// for getting last message time( used in userchat card)
-  static getLastMessageTime({
+  static String getLastMessageTime({
     required BuildContext context,
     required String time,
     bool showYear = false,
